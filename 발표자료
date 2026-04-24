@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>동래에서 부산으로 — 이무현</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+  <style>
+    :root {
+      --sea-deep: #185a73;
+      --sea-main: #2c86a5;
+      --sea-soft: #63c3dc;
+      --sea-mist: #dff5fb;
+      --foam: #f8fdff;
+      --sand: #f8efe2;
+      --shell: #fffaf3;
+      --coral: #ff9773;
+      --coral-soft: #ffc7b4;
+      --sun: #ffe2b0;
+      --text: #17495b;
+      --muted: #5a7e8e;
+      --border: rgba(56, 145, 174, 0.18);
+      --shadow: 0 20px 48px rgba(36, 115, 140, 0.12);
+      --shadow-soft: 0 12px 32px rgba(75, 150, 174, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 226, 176, 0.55), transparent 28%),
+        radial-gradient(circle at right 20%, rgba(99, 195, 220, 0.18), transparent 22%),
+        linear-gradient(180deg, #f7fdff 0%, #fffaf4 45%, #f2fbff 100%);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: url('busan-sea-assets/wave-texture.png') center top / cover no-repeat;
+      opacity: 0.14;
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto -10vw -12rem auto;
+      width: 28rem;
+      height: 28rem;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 199, 180, 0.32), rgba(255, 199, 180, 0));
+      filter: blur(18px);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    a { color: inherit; }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(248, 253, 255, 0.8);
+      border-bottom: 1px solid rgba(44, 134, 165, 0.16);
+      backdrop-filter: blur(16px);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      box-shadow: 0 10px 35px rgba(123, 182, 198, 0.08);
+    }
+
+    .nav-brand {
+      font-family: 'Noto Serif KR', serif;
+      color: var(--sea-deep);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+
+    .nav-links { display: flex; gap: 0.35rem; }
+
+    .nav-links a {
+      color: rgba(23, 73, 91, 0.72);
+      text-decoration: none;
+      font-size: 0.8rem;
+      padding: 0 1rem;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      border-radius: 999px;
+      transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+      letter-spacing: 0.03em;
+    }
+
+    .nav-links a:hover {
+      color: var(--sea-deep);
+      background: rgba(99, 195, 220, 0.16);
+      transform: translateY(-1px);
+    }
+
+    #hero {
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(248, 253, 255, 0.16), rgba(248, 253, 255, 0.65)),
+        url('busan-sea-assets/hero-busan-sea.png') center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 8rem 2rem 4.5rem;
+      color: var(--sea-deep);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero::before {
+      content: "";
+      position: absolute;
+      inset: auto 0 -4rem 0;
+      height: 18rem;
+      background:
+        linear-gradient(180deg, rgba(248, 253, 255, 0), rgba(248, 253, 255, 0.7)),
+        url('busan-sea-assets/wave-texture.png') center bottom / cover no-repeat;
+      opacity: 0.48;
+      pointer-events: none;
+    }
+
+    #hero > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-tag {
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--sea-deep);
+      border: 1px solid rgba(44, 134, 165, 0.28);
+      background: rgba(248, 253, 255, 0.62);
+      padding: 0.45rem 1.15rem;
+      border-radius: 999px;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 24px rgba(82, 154, 179, 0.12);
+    }
+
+    #hero h1 {
+      font-family: 'Noto Serif KR', serif;
+      font-size: clamp(2.2rem, 5vw, 4.15rem);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 1.1rem;
+      max-width: 780px;
+      text-shadow: 0 10px 24px rgba(255, 255, 255, 0.65);
+    }
+
+    #hero p.sub {
+      font-size: 1.08rem;
+      color: rgba(23, 73, 91, 0.78);
+      margin-bottom: 2.4rem;
+      max-width: 600px;
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 0.82rem;
+      color: rgba(23, 73, 91, 0.84);
+      margin-bottom: 2.8rem;
+    }
+
+    .meta-row span {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1rem;
+      background: rgba(248, 253, 255, 0.7);
+      border: 1px solid rgba(44, 134, 165, 0.14);
+      border-radius: 999px;
+      box-shadow: 0 10px 24px rgba(82, 154, 179, 0.08);
+    }
+
+    .ch-nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .ch-btn {
+      padding: 0.72rem 1.55rem;
+      border: 1px solid rgba(44, 134, 165, 0.24);
+      background: rgba(248, 253, 255, 0.76);
+      color: var(--sea-deep);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      border-radius: 999px;
+      box-shadow: 0 12px 26px rgba(82, 154, 179, 0.1);
+    }
+
+    .ch-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(223, 245, 251, 0.95));
+      transform: translateY(-2px);
+      box-shadow: 0 16px 30px rgba(82, 154, 179, 0.16);
+    }
+
+    .scroll-hint {
+      font-size: 0.72rem;
+      color: rgba(23, 73, 91, 0.5);
+      letter-spacing: 0.16em;
+    }
+
+    .arrow-down {
+      animation: bounce 2s infinite;
+      display: block;
+      margin-top: 0.55rem;
+      font-size: 1.2rem;
+      color: var(--coral);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+
+    section {
+      padding: 6.3rem 2rem;
+      position: relative;
+      isolation: isolate;
+    }
+
+    section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ch-label {
+      display: inline-block;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--coral);
+      border-bottom: 1px solid rgba(255, 151, 115, 0.7);
+      padding-bottom: 0.2rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .section-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: clamp(1.6rem, 3vw, 2.3rem);
+      font-weight: 700;
+      color: var(--sea-deep);
+      margin-bottom: 0.6rem;
+    }
+
+    .section-desc {
+      font-size: 0.96rem;
+      color: var(--muted);
+      max-width: 610px;
+      margin-bottom: 3rem;
+    }
+
+    .gold-line {
+      width: 3.4rem;
+      height: 3px;
+      background: linear-gradient(90deg, var(--coral), rgba(255, 151, 115, 0));
+      margin-bottom: 3rem;
+      border-radius: 999px;
+    }
+
+    #intro {
+      background:
+        linear-gradient(180deg, rgba(222, 245, 251, 0.65), rgba(255, 250, 243, 0.8)),
+        url('busan-sea-assets/wave-texture.png') center/cover no-repeat;
+    }
+
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .intro-card {
+      border: 1px solid var(--border);
+      padding: 2rem 1.6rem;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(12px);
+    }
+
+    .intro-card .num {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 2.5rem;
+      color: rgba(44, 134, 165, 0.24);
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .intro-card h4 {
+      font-size: 0.92rem;
+      color: var(--sea-main);
+      margin-bottom: 0.6rem;
+    }
+
+    .intro-card p {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .insight-box {
+      margin-top: 3rem;
+      border: 1px solid rgba(255, 151, 115, 0.22);
+      border-left: 4px solid var(--coral);
+      padding: 1.7rem 2rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(255, 244, 238, 0.9));
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .insight-box p {
+      font-size: 1.05rem;
+      color: var(--sea-deep);
+      font-style: italic;
+    }
+
+    .insight-box cite {
+      font-size: 0.79rem;
+      color: var(--coral);
+      display: block;
+      margin-top: 0.7rem;
+    }
+
+    .ch04-bridge {
+      margin: 2.2rem 0 2.6rem;
+    }
+
+    #ch04 .ch04-bridge .insight-box {
+      margin-top: 0;
+    }
+
+    #ch01 { background: rgba(255, 255, 255, 0.38); }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .wiki-link-card {
+      border: 1px solid var(--border);
+      padding: 2rem;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.86);
+      text-decoration: none;
+      display: block;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .wiki-link-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .wiki-link-card .wl-tag {
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .wiki-link-card h4 {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.12rem;
+      color: var(--sea-deep);
+      margin-bottom: 0.4rem;
+    }
+
+    .wiki-link-card p {
+      font-size: 0.83rem;
+      color: var(--muted);
+    }
+
+    .wiki-link-card .arrow {
+      color: var(--coral);
+      font-size: 0.8rem;
+      margin-top: 0.8rem;
+      display: block;
+    }
+
+    .subheading {
+      font-size: 0.86rem;
+      color: var(--sea-deep);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .ontology-list { list-style: none; }
+
+    .ontology-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.82rem 0;
+      border-bottom: 1px solid rgba(56, 145, 174, 0.12);
+      font-size: 0.86rem;
+    }
+
+    .ontology-list .tag {
+      background: rgba(44, 134, 165, 0.1);
+      color: var(--sea-deep);
+      font-size: 0.69rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid rgba(44, 134, 165, 0.15);
+    }
+
+    .graph-wrap {
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.82);
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+
+    #mynetwork {
+      width: 100%;
+      height: 350px;
+      background:
+        radial-gradient(circle at top, rgba(248, 253, 255, 0.85), rgba(223, 245, 251, 0.95)),
+        url('busan-sea-assets/wave-texture.png') center/cover no-repeat;
+    }
+
+    .graph-caption {
+      padding: 0.95rem 1rem;
+      font-size: 0.77rem;
+      color: var(--muted);
+      background: rgba(248, 253, 255, 0.92);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      border-top: 1px solid rgba(56, 145, 174, 0.12);
+    }
+
+    .ghost-inline-link {
+      color: var(--sea-deep);
+      font-size: 0.74rem;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid rgba(44, 134, 165, 0.18);
+      background: rgba(255, 255, 255, 0.8);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .ghost-inline-link:hover {
+      background: rgba(223, 245, 251, 0.9);
+      transform: translateY(-1px);
+    }
+
+    .lst-box {
+      margin-top: 1rem;
+      padding: 1rem 1.1rem;
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      font-size: 0.79rem;
+      color: var(--muted);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .lst-box strong {
+      color: var(--sea-deep);
+      display: block;
+      margin-bottom: 0.45rem;
+    }
+
+    #ch02 {
+      background:
+        linear-gradient(180deg, rgba(255, 250, 243, 0.82), rgba(223, 245, 251, 0.42));
+    }
+
+    .bigkinds-box {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(223, 245, 251, 0.78)),
+        url('busan-sea-assets/wave-texture.png') center/cover no-repeat;
+      padding: 2.6rem;
+      border-radius: 34px;
+      margin-bottom: 3rem;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+      align-items: center;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .bk-left h4 {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.22rem;
+      color: var(--sea-deep);
+      margin-bottom: 0.5rem;
+    }
+
+    .bk-left p {
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .bk-left a.bk-link {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.58rem 1.25rem;
+      border: 1px solid rgba(44, 134, 165, 0.22);
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--sea-deep);
+      text-decoration: none;
+      font-size: 0.79rem;
+      border-radius: 999px;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .bk-left a.bk-link:hover {
+      background: rgba(223, 245, 251, 0.9);
+      transform: translateY(-1px);
+    }
+
+    .bk-findings {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .bk-finding {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: 1rem 1.1rem;
+      border: 1px solid rgba(56, 145, 174, 0.12);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.66);
+      box-shadow: 0 10px 20px rgba(82, 154, 179, 0.08);
+    }
+
+    .bk-num {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: rgba(44, 134, 165, 0.34);
+      min-width: 2rem;
+    }
+
+    .bk-text h5 {
+      font-size: 0.83rem;
+      color: var(--sea-main);
+      margin-bottom: 0.3rem;
+    }
+
+    .bk-text p {
+      font-size: 0.79rem;
+      color: var(--muted);
+    }
+
+    .timeline-section h3 {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.1rem;
+      color: var(--sea-deep);
+      margin-bottom: 1rem;
+    }
+
+    .timeline-wrap {
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+    }
+
+    .timeline-wrap iframe {
+      display: block;
+      width: 100%;
+      height: 650px;
+      border: none;
+      background: #fff;
+    }
+
+    #ch03 {
+      background:
+        linear-gradient(180deg, rgba(236, 250, 254, 0.96), rgba(255, 250, 244, 0.9)),
+        url('busan-sea-assets/wave-texture.png') center/cover no-repeat;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .content-block {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .content-block-header {
+      padding: 1.3rem 1.5rem;
+      border-bottom: 1px solid rgba(56, 145, 174, 0.12);
+      background: linear-gradient(180deg, rgba(248, 253, 255, 0.92), rgba(240, 251, 255, 0.88));
+    }
+
+    .content-block-header .cb-tag {
+      font-size: 0.66rem;
+      letter-spacing: 0.15em;
+      color: var(--coral);
+      margin-bottom: 0.35rem;
+      font-weight: 600;
+    }
+
+    .content-block-header h4 {
+      font-size: 0.96rem;
+      color: var(--sea-deep);
+    }
+
+    .slide-embed { padding: 1.5rem; }
+
+    .media-stack {
+      padding: 1.15rem;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(248, 253, 255, 0.92));
+    }
+
+    .slide-scroll-panel {
+      height: min(88vh, 980px);
+      overflow-y: scroll;
+      overflow-x: hidden;
+      padding: 0.45rem 0.8rem 0.45rem 0.35rem;
+      display: block;
+      scroll-snap-type: y proximity;
+      overscroll-behavior: contain;
+      scrollbar-width: auto;
+      scrollbar-color: rgba(44, 134, 165, 0.56) rgba(255, 255, 255, 0.65);
+    }
+
+    .slide-scroll-panel::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    .slide-scroll-panel::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.72);
+      border-radius: 999px;
+    }
+
+    .slide-scroll-panel::-webkit-scrollbar-thumb {
+      background: rgba(44, 134, 165, 0.56);
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.72);
+    }
+
+    .slide-shot {
+      position: relative;
+      display: block;
+      margin: 0 0 1rem;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(56, 145, 174, 0.14);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 14px 30px rgba(71, 143, 168, 0.12);
+    }
+
+    .slide-shot:last-child {
+      margin-bottom: 0;
+    }
+
+    .slide-shot img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      background: #f6fbfd;
+    }
+
+    .slide-shot figcaption {
+      display: none;
+    }
+
+    .slide-link {
+      display: block;
+      margin-top: 1rem;
+      text-align: center;
+      padding: 0.75rem;
+      border: 1px solid rgba(44, 134, 165, 0.18);
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--sea-deep);
+      text-decoration: none;
+      font-size: 0.8rem;
+      border-radius: 999px;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .slide-link:hover {
+      background: rgba(223, 245, 251, 0.9);
+      transform: translateY(-1px);
+    }
+
+    .video-embed {
+      padding: 1.6rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 315px;
+      margin: 0 auto;
+      padding-bottom: 177.78%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 24px;
+      box-shadow: 0 18px 40px rgba(71, 143, 168, 0.18);
+      border: 6px solid rgba(248, 253, 255, 0.7);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .video-origin {
+      text-align: center;
+      padding-bottom: 1.5rem;
+    }
+
+    .video-origin a {
+      font-size: 0.76rem;
+      color: var(--sea-main);
+      text-decoration: none;
+    }
+
+    #ch04 { background: rgba(255, 255, 255, 0.32); }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .insight-card {
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      border-radius: 28px;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(12px);
+    }
+
+    .insight-card .ic-num {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 3rem;
+      color: rgba(44, 134, 165, 0.12);
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .insight-card h4 {
+      font-size: 0.92rem;
+      color: var(--sea-deep);
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    .insight-card p {
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.82;
+    }
+
+    .reflection-box {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.84), rgba(223, 245, 251, 0.78)),
+        url('busan-sea-assets/wave-texture.png') center/cover no-repeat;
+      padding: 3rem;
+      border-radius: 34px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .reflection-box h3 {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.3rem;
+      color: var(--sea-deep);
+      margin-bottom: 1.5rem;
+    }
+
+    .reflection-items {
+      display: flex;
+      flex-direction: column;
+      gap: 1.55rem;
+    }
+
+    .ref-item {
+      display: flex;
+      gap: 1.2rem;
+      padding: 1rem 0;
+      border-top: 1px solid rgba(56, 145, 174, 0.1);
+    }
+
+    .ref-item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .ref-q {
+      font-size: 0.72rem;
+      color: var(--coral);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      min-width: 3.6rem;
+      padding-top: 0.2rem;
+    }
+
+    .ref-a {
+      font-size: 0.86rem;
+      color: var(--text);
+      line-height: 1.82;
+    }
+
+    .ref-a strong {
+      color: var(--sea-main);
+      font-weight: 600;
+    }
+
+    footer {
+      background:
+        linear-gradient(180deg, rgba(236, 250, 254, 0.96), rgba(222, 245, 251, 0.95));
+      color: rgba(23, 73, 91, 0.72);
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid rgba(56, 145, 174, 0.12);
+    }
+
+    footer .f-title {
+      font-family: 'Noto Serif KR', serif;
+      color: var(--sea-deep);
+      font-size: 1.03rem;
+      margin-bottom: 0.5rem;
+    }
+
+    footer p {
+      font-size: 0.79rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .footer-link {
+      color: var(--sea-main);
+      text-decoration: none;
+      font-size: 0.78rem;
+    }
+
+    .footer-link:hover { color: var(--coral); }
+
+    @media (max-width: 900px) {
+      .intro-grid,
+      .two-col,
+      .content-grid,
+      .insight-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bigkinds-box {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        padding: 0 1rem;
+        height: 60px;
+      }
+
+      .nav-links { display: none; }
+
+      #hero {
+        padding: 7rem 1.3rem 4rem;
+      }
+
+      .meta-row {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .ch-nav { gap: 0.6rem; }
+
+      section {
+        padding: 5.2rem 1.2rem;
+      }
+
+      .reflection-box,
+      .bigkinds-box,
+      .intro-card,
+      .content-block,
+      .insight-card,
+      .graph-wrap,
+      .wiki-link-card {
+        border-radius: 24px;
+      }
+
+      .slide-scroll-panel {
+        height: min(72vh, 700px);
+        padding-right: 0.65rem;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .ref-item {
+        flex-direction: column;
+        gap: 0.55rem;
+      }
+
+      .graph-caption {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#hero">동래에서 부산으로</a>
+  <div class="nav-links">
+    <a href="#intro">탐구 배경</a>
+    <a href="#ch01">CH.01 소재·지식</a>
+    <a href="#ch02">CH.02 데이터 분석</a>
+    <a href="#ch03">CH.03 콘텐츠</a>
+    <a href="#ch04">CH.04 인사이트</a>
+  </div>
+</nav>
+
+<section id="hero">
+  <div class="hero-tag">PNU 로컬 디지털 인문학 · 2026 · 사학과 이무현</div>
+  <h1>동래에서 부산으로:<br>공간과 권력의 이동</h1>
+  <p class="sub">노드와 엣지로 읽어내는 식민지 근대 도시의 탄생</p>
+  <div class="meta-row">
+    <span>📍 부산 근대사</span>
+    <span>🗂 온톨로지 기반 지식그래프</span>
+    <span>📰 빅카인즈 뉴스 분석</span>
+  </div>
+  <div class="ch-nav">
+    <a class="ch-btn" href="#ch01">CH.01 소재·지식</a>
+    <a class="ch-btn" href="#ch02">CH.02 데이터 분석</a>
+    <a class="ch-btn" href="#ch03">CH.03 콘텐츠</a>
+    <a class="ch-btn" href="#ch04">CH.04 인사이트</a>
+  </div>
+  <div class="scroll-hint">
+    SCROLL
+    <span class="arrow-down">↓</span>
+  </div>
+</section>
+
+<section id="intro">
+  <div class="inner">
+    <span class="ch-label">PROJECT OVERVIEW</span>
+    <h2 class="section-title">탐구 배경과 연구 방법</h2>
+    <p class="section-desc">1876년 개항 이후 부산은 어떻게 지금의 모습이 되었는가. 데이터로 해석하는 공간 권력의 이동.</p>
+    <div class="intro-grid">
+      <div class="intro-card">
+        <div class="num">01</div>
+        <h4>탐구 질문</h4>
+        <p>조선시대 행정 중심지였던 동래에서 왜, 어떻게 부산항으로 지역 중심이 옮겨졌는가? 그 과정은 우연인가, 인위적인가?</p>
+      </div>
+      <div class="intro-card">
+        <div class="num">02</div>
+        <h4>선택 이유</h4>
+        <p>부산 개항 150주년(2026)을 맞아, 흩어진 역사 자료를 디지털 인문학 방법론으로 재구조화하여 권력 이동의 구조를 시각화하고자 했다.</p>
+      </div>
+      <div class="intro-card">
+        <div class="num">03</div>
+        <h4>연구 방법</h4>
+        <p>미디어위키 아카이빙 → MakeGraph 온톨로지 설계 → Timeline JS 시각화 → 빅카인즈 뉴스 분석 → AI 멀티모달 콘텐츠 제작</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ch01">
+  <div class="inner">
+    <span class="ch-label">CH.01</span>
+    <h2 class="section-title">지역·소재 소개</h2>
+    <p class="section-desc">미디어위키로 구축한 지역 아카이브와 MakeGraph 지식그래프로 설계한 관계망</p>
+    <div class="gold-line"></div>
+
+    <div class="two-col">
+      <div>
+        <a class="wiki-link-card" href="https://dh.aks.ac.kr/~kimseoyun/wiki/index.php/%EB%8F%99%EB%9E%98%EC%97%90%EC%84%9C_%EB%B6%80%EC%82%B0%EC%9C%BC%EB%A1%9C" target="_blank">
+          <div class="wl-tag">MEDIAWIKI ARCHIVE</div>
+          <h4>동래에서 부산으로 — 위키 문서</h4>
+          <p>기본정보 · 의미관계망 · 지도 · 타임라인 · 참고자료 · 관련영상을 모두 담은 지역 아카이브</p>
+          <span class="arrow">→ 위키 문서 열기</span>
+        </a>
+
+        <h4 class="subheading">온톨로지 설계 구조</h4>
+        <ul class="ontology-list">
+          <li>Class (범주) <span class="tag">10개</span></li>
+          <li>Relation (관계어) <span class="tag">25개</span></li>
+          <li>Nodes (노드) <span class="tag">32개</span></li>
+          <li>Links (링크) <span class="tag">40+개</span></li>
+        </ul>
+        <p style="font-size:0.8rem;color:var(--muted);margin-top:1.2rem;line-height:1.7;">
+          국가·조약·시점·장소·시설·집단·기관·제도·사건·개념 등 10개 범주로 분류된 노드들이
+          '체결했다', '개항했다', '대체했다' 등 25개의 관계어로 연결되어
+          부산 근대 도시화의 인과 구조를 드러냅니다.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="subheading">MakeGraph 기반 의미망 구조</h4>
+        <div class="graph-wrap">
+          <div id="mynetwork"></div>
+          <div class="graph-caption">
+            <span>인터랙티브 노드 맵 (마우스로 드래그 해보세요)</span>
+            <a href="https://dh.aks.ac.kr/~kimseoyun/wiki/index.php/%EB%8F%99%EB%9E%98%EC%97%90%EC%84%9C_%EB%B6%80%EC%82%B0%EC%9C%BC%EB%A1%9C" target="_blank" class="ghost-inline-link">전체 위키 보기 →</a>
+          </div>
+        </div>
+        <div class="lst-box">
+          <strong>lst 파일 정보</strong>
+          #Project: 근대 부산의 도시 공간 변화와 중심지 이동<br>
+          Class 10개 · Relation 25개 · Node 32개 · Link 51개
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ch02">
+  <div class="inner">
+    <span class="ch-label">CH.02</span>
+    <h2 class="section-title">데이터 분석</h2>
+    <p class="section-desc">빅카인즈 뉴스 빅데이터 분석과 Knight Lab Timeline JS로 구현한 역사적 흐름</p>
+    <div class="gold-line"></div>
+
+    <div class="bigkinds-box">
+      <div class="bk-left">
+        <h4>빅카인즈<br>뉴스 분석</h4>
+        <p>동래·부산 관련 뉴스 담론의 트렌드·연관어·관계도 분석</p>
+        <a class="bk-link" href="https://dh.aks.ac.kr/~kimseoyun/wiki/index.php/%EB%8F%99%EB%9E%98_-_%EB%B9%85%EC%B9%B4%EC%9D%B8%EC%A6%88_%EB%89%B4%EC%8A%A4_%EB%B6%84%EC%84%9D" target="_blank">→ 분석 보고서 전문 보기</a>
+      </div>
+      <div class="bk-findings">
+        <div class="bk-finding">
+          <div class="bk-num">1</div>
+          <div class="bk-text">
+            <h5>트렌드 분석</h5>
+            <p>동래에 대한 언론의 관심은 역사적 재조명이 아닌, 지자체의 행정 및 사건·사고에 의해 주도됨</p>
+          </div>
+        </div>
+        <div class="bk-finding">
+          <div class="bk-num">2</div>
+          <div class="bk-text">
+            <h5>연관어 분석</h5>
+            <p>과거 부산 전체를 관할하던 '동래부'의 위상은 사라지고, 뉴스 연관어 1위인 **'구청장'**에서 보듯 부산의 하위 행정구역으로만 인식됨</p>
+          </div>
+        </div>
+        <div class="bk-finding">
+          <div class="bk-num">3</div>
+          <div class="bk-text">
+            <h5>관계도 분석</h5>
+            <p>담론의 핵심 행위자는 지방정부 및 공공기관이며, 역사학자나 시민단체 등 역사적 정체성을 복원하려는 주체는 소외됨.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-section">
+      <h3>역사적 사건 타임라인 — Knight Lab Timeline JS</h3>
+      <div class="timeline-wrap">
+        <iframe
+          src="https://cdn.knightlab.com/libs/timeline3/latest/embed/index.html?source=v2%3A2PACX-1vRGS8ranC420eBfFUeWotUJO4NdvN-2TPZtfaMN4UzRla1F5v285niBIkTSc3SD6_faV5tRgjg89owf&font=Default&lang=ko&initial_zoom=2&height=650"
+          title="동래에서 부산으로 역사 타임라인"
+          width="100%"
+          height="650"
+          frameborder="0"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ch03">
+  <div class="inner">
+    <span class="ch-label">CH.03</span>
+    <h2 class="section-title">콘텐츠 결과물</h2>
+    <p class="section-desc">NotebookLM 발표 슬라이드와 AI 영상으로 구현한 멀티모달 디지털 인문학 콘텐츠</p>
+    <div class="gold-line"></div>
+
+    <div class="content-grid">
+      <div class="content-block">
+        <div class="content-block-header">
+          <div class="cb-tag">PRESENTATION · NOTEBOOKLM</div>
+          <h4>발표 슬라이드 — 동래에서 부산으로</h4>
+        </div>
+        <div class="slide-embed media-stack">
+          <div class="slide-scroll-panel" aria-label="발표 슬라이드 이미지 목록" tabindex="0">
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-01.jpg" alt="발표 슬라이드 1" loading="lazy">
+              <figcaption>01</figcaption>
+            </figure>
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-02.jpg" alt="발표 슬라이드 2" loading="lazy">
+              <figcaption>02</figcaption>
+            </figure>
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-03.jpg" alt="발표 슬라이드 3" loading="lazy">
+              <figcaption>03</figcaption>
+            </figure>
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-04.jpg" alt="발표 슬라이드 4" loading="lazy">
+              <figcaption>04</figcaption>
+            </figure>
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-05.jpg" alt="발표 슬라이드 5" loading="lazy">
+              <figcaption>05</figcaption>
+            </figure>
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-06.jpg" alt="발표 슬라이드 6" loading="lazy">
+              <figcaption>06</figcaption>
+            </figure>
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-07.jpg" alt="발표 슬라이드 7" loading="lazy">
+              <figcaption>07</figcaption>
+            </figure>
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-08.jpg" alt="발표 슬라이드 8" loading="lazy">
+              <figcaption>08</figcaption>
+            </figure>
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-09.jpg" alt="발표 슬라이드 9" loading="lazy">
+              <figcaption>09</figcaption>
+            </figure>
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-10.jpg" alt="발표 슬라이드 10" loading="lazy">
+              <figcaption>10</figcaption>
+            </figure>
+            <figure class="slide-shot">
+              <img src="busan-sea-assets/notebooklm-slides/slide-11.jpg" alt="발표 슬라이드 11" loading="lazy">
+              <figcaption>11</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="content-block-header">
+          <div class="cb-tag">AI VIDEO · YOUTUBE SHORTS</div>
+          <h4>개항150주년 — 부산의 도시 변화 (AI 영상)</h4>
+        </div>
+        <div class="video-embed">
+          <div class="video-wrapper">
+            <iframe
+              src="https://www.youtube.com/embed/jFkGFifJwTM?rel=0"
+              title="개항150주년 : 부산의 도시 변화"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+        <div class="video-origin">
+          <a href="https://youtube.com/shorts/jFkGFifJwTM" target="_blank">YouTube에서 원본 보기 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ch04">
+  <div class="inner">
+    <span class="ch-label">CH.04</span>
+    <h2 class="section-title">인사이트 · 제언 · 개인성찰</h2>
+    <p class="section-desc">데이터가 말하는 것과 말하지 않는 것, 그리고 이 프로젝트를 통해 발견한 것</p>
+    <div class="gold-line"></div>
+
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="ic-num">01</div>
+        <h4>지형의 극복과 식민지 설계</h4>
+        <p>1898년부터 시작된 부산항 매축공사는 단순한 토목사업이 아니였다. 산지가 많은 부산의 지형을 극복해 근대식 시가지를 형성함으로서 일본인 거류지를 확장하고 경부선 종착역을 배치하는, 철저히 의도된 식민주의적 공간 기획이었다.</p>
+      </div>
+      <div class="insight-card">
+        <div class="ic-num">02</div>
+        <h4>기능의 해체와 근대화</h4>
+        <p>조선시대 동헌에 집중됐던 행정·사법·군사 권력은 1910년 이후 부산부청(행정), 부산지방법원(사법), 부산세관(무역), 부산역(교통)으로 기능 분화되었는데 이것은 효율적 수탈 시스템의 구현이었다.</p>
+      </div>
+      <div class="insight-card">
+        <div class="ic-num">03</div>
+        <h4>디지털 인문학의 가치 — 데이터의 증언</h4>
+        <p>지식그래프의 허브 노드를 분석하면 '일본'과 '부산항'이 압도적 중심였다. 역사 서술이 어떤 관계 선택으로 이루어지는지, 노드와 링크로 가시화할 때 비로소 '권력의 중력'이 실증된다.</p>
+      </div>
+      <div class="insight-card">
+        <div class="ic-num">04</div>
+        <h4>활용방안 — 부산 개항 150주년 콘텐츠</h4>
+        <p>이 아카이브는 부산박물관 특별전(가), 부산관광공사 외국인 관광 콘텐츠, 로컬 블랜딩 트렌드에 대응하는 역사 기반 스토리텔링 콘텐츠로 확장할 수 있고, 교육 자료로서도 융용하다.</p>
+      </div>
+    </div>
+
+    <div class="ch04-bridge">
+      <div class="insight-box">
+        <p>"공간의 재편은 곧 권력의 재편이다. 동래에서 부산항으로의 중심 이동은 자연적 확장이 아니라, 철저히 의도된 식민주의적 공간 기획이었다."</p>
+        <cite>— 핵심 메시지 (이무현, 2026)</cite>
+      </div>
+    </div>
+
+    <div class="reflection-box">
+      <h3>개인성찰 — AI 디렉터로서의 판단</h3>
+      <div class="reflection-items">
+        <div class="ref-item">
+          <div class="ref-q">Q.01</div>
+          <div class="ref-a">
+            <strong>이 소재를 선택한 이유는?</strong><br>
+            올해 부산 개항 150주년이라는 시점에서, 부산이라는 지역이 어떻게 만들어졌는지를 추적하고 싶었다.
+            역사책의 서술에만 의존하는 것이 아니라 데이터화를 통해 부산의 변화를 재구성하여 평소 주목받기 어려운 이야기를 재조명하는 이 프로젝트의 출발이었다.
+          </div>
+        </div>
+        <div class="ref-item">
+          <div class="ref-q">Q.02</div>
+          <div class="ref-a">
+            <strong>빅카인즈 데이터에서 얻은 인사이트는?</strong><br>
+            과거 부산의 중심지였던 동래가 현재 뉴스에서는 역사적 맥락이 거세된 채 '구청장'이나 '코로나19'와 같은 행정·기능적 단위로만 소비되고 있다는 사실이 인상적이였다. 특히 개항 150주년이라는 시점에도 불구하고 관련 역사 키워드가 전무한 '데이터의 공백'을 목도하며, 일제강점기 행정 개편이 남긴 내면화된 도시 공간의 인식이 오늘까지 지배하고 있음을 절감했다.
+          </div>
+        </div>
+        <div class="ref-item">
+          <div class="ref-q">Q.03</div>
+          <div class="ref-a">
+            <strong>데이터가 말하지 않는 것은?</strong><br>
+            지식그래프는 '일본'이 모든 것을 설치하고 개편했다고 보여줍니다. 그러나 그 과정에서 동래 주민들이 어떻게 저항하거나 적응했는지, 조선인들의 목소리는 데이터에 포착되지 않습니다. 이것이 이 프로젝트의 가장 큰 한계이자, 다음 연구의 출발점이다.
+          </div>
+        </div>
+        <div class="ref-item">
+          <div class="ref-q">Q.04</div>
+          <div class="ref-a">
+            <strong>AI와의 협업에서 내가 디렉터로서 한 판단은?</strong><br>
+            여러 AI 도구를 하나에 의존하지 않고 기능별로 역할을 분리해 조합하는 판단을 했다.
+            각 AI의 결과를 비교·검증하며 방향에 맞게 재구성하여 완성도를 높였다.
+            이를 통해 AI를 사용하는 것을 넘어 결과를 설계하고 통제하는 디렉터의 역할을 수행했다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-title">동래에서 부산으로: 공간과 권력의 이동</div>
+  <p>사학과 이무현 · PNU 로컬 디지털 인문학의 이해 · 2026</p>
+  <p style="margin-top:0.8rem;">
+    <a href="https://dh.aks.ac.kr/~kimseoyun/wiki/index.php/%EB%8F%99%EB%9E%98%EC%97%90%EC%84%9C_%EB%B6%80%EC%82%B0%EC%9C%BC%EB%A1%9C" target="_blank" class="footer-link">위키 문서</a>
+    &nbsp;·&nbsp;
+    <a href="https://dh.aks.ac.kr/~kimseoyun/wiki/index.php/%EB%8F%99%EB%9E%98_-_%EB%B9%85%EC%B9%B4%EC%9D%B8%EC%A6%88_%EB%89%B4%EC%8A%A4_%EB%B6%84%EC%84%9D" target="_blank" class="footer-link">빅카인즈 분석</a>
+    &nbsp;·&nbsp;
+    <a href="https://youtube.com/shorts/jFkGFifJwTM" target="_blank" class="footer-link">AI 영상</a>
+  </p>
+</footer>
+
+<script>
+  const initGraph = () => {
+    const nodes = new vis.DataSet([
+      { id: '일본', label: '일본', shape: 'image', image: 'https://dh.aks.ac.kr/~kimseoyun/wiki/images/1/1d/%EC%9D%BC%EB%B4%84.png' },
+      { id: '조선', label: '조선' },
+      { id: '강화도조약', label: '강화도조약' },
+      { id: '부산구조계조약', label: '부산구조계조약' },
+      { id: '1876년', label: '1876년' },
+      { id: '1877년', label: '1877년' },
+      { id: '1884년', label: '1884년' },
+      { id: '1898년', label: '1898년' },
+      { id: '1905년', label: '1905년' },
+      { id: '1908년', label: '1908년' },
+      { id: '1910년', label: '1910년' },
+      { id: '1911년', label: '1911년' },
+      { id: '부산항', label: '부산항' },
+      { id: '동래', label: '동래' },
+      { id: '일본인거류지', label: '일본인거류지' },
+      { id: '온천', label: '온천' },
+      { id: '초량왜관', label: '초량왜관' },
+      { id: '초량역', label: '초량역' },
+      { id: '부산역', label: '부산역', shape: 'image', image: 'https://dh.aks.ac.kr/~kimseoyun/wiki/images/2/26/%EC%98%9B_%EB%B6%80%EC%82%B0%EC%97%AD.JPG' },
+      { id: '온천장역', label: '온천장역' },
+      { id: '경부선', label: '경부선' },
+      { id: '부산전차', label: '부산전차' },
+      { id: '일본인', label: '일본인' },
+      { id: '부산일본영사관', label: '부산일본영사관' },
+      { id: '부산세관', label: '부산세관', shape: 'image', image: 'https://dh.aks.ac.kr/~kimseoyun/wiki/images/thumb/6/6f/1920%EB%85%84%EB%8C%80_%EB%B6%80%EC%82%B0_%EC%A4%91%EA%B5%AC_%EC%A4%91%EC%95%99%EB%8F%99_%EB%B6%80%EC%82%B0%EC%84%B8%EA%B4%80_2.jpg/1599px-1920%EB%85%84%EB%8C%80_%EB%B6%80%EC%82%B0_%EC%A4%91%EA%B5%AC_%EC%A4%91%EC%95%99%EB%8F%99_%EB%B6%80%EC%82%B0%EC%84%B8%EA%B4%80_2.jpg' },
+      { id: '우편국', label: '우편국' },
+      { id: '부산부청', label: '부산부청' },
+      { id: '동헌', label: '동헌', shape: 'image', image: 'https://dh.aks.ac.kr/~kimseoyun/wiki/images/thumb/f/f0/%EB%8F%99%EB%9E%98%EB%B6%80_%EB%8F%99%ED%97%8C_%EC%B6%A9%EC%8B%A0%EB%8B%B9-.jpg/1600px-%EB%8F%99%EB%9E%98%EB%B6%80_%EB%8F%99%ED%97%8C_%EC%B6%A9%EC%8B%A0%EB%8B%B9-.jpg' },
+      { id: '부산부제', label: '부산부제' },
+      { id: '부군면통폐합', label: '부군면통폐합' },
+      { id: '도시중심', label: '도시중심' }
+    ]);
+
+    const edges = new vis.DataSet([
+      { from: '일본', to: '강화도조약', label: '체결했다' },
+      { from: '조선', to: '강화도조약', label: '체결했다' },
+      { from: '강화도조약', to: '1876년', label: '체결되었다' },
+      { from: '부산항', to: '1876년', label: '개항했다' },
+      { from: '일본', to: '부산구조계조약', label: '체결했다' },
+      { from: '조선', to: '부산구조계조약', label: '체결했다' },
+      { from: '부산구조계조약', to: '1877년', label: '체결되었다' },
+      { from: '일본인거류지', to: '1877년', label: '설치되었다' },
+      { from: '일본인거류지', to: '부산항', label: '위치했다' },
+      { from: '일본인', to: '일본인거류지', label: '생활했다' },
+      { from: '일본인', to: '일본', label: '국민이다' },
+      { from: '일본', to: '부산항', label: '매축공사했다' },
+      { from: '부산항', to: '1898년', label: '매축공사되었다' },
+      { from: '경부선', to: '1905년', label: '개통되었다' },
+      { from: '일본', to: '경부선', label: '설치했다' },
+      { from: '경부선', to: '초량역', label: '종착했다' },
+      { from: '초량역', to: '부산항', label: '위치했다' },
+      { from: '경부선', to: '부산역', label: '연결되었다' },
+      { from: '부산역', to: '부산항', label: '위치했다' },
+      { from: '부산전차', to: '1908년', label: '개통되었다' },
+      { from: '일본', to: '부산전차', label: '설치했다' },
+      { from: '부산전차', to: '부산역', label: '통과했다' },
+      { from: '일본', to: '부산항', label: '사용했다' },
+      { from: '일본', to: '부산일본영사관', label: '설치했다' },
+      { from: '부산일본영사관', to: '부산항', label: '위치했다' },
+      { from: '부산일본영사관', to: '1884년', label: '설치되었다' },
+      { from: '일본', to: '부산세관', label: '설치했다' },
+      { from: '부산세관', to: '부산항', label: '위치했다' },
+      { from: '부산세관', to: '1884년', label: '설치되었다' },
+      { from: '일본', to: '우편국', label: '설치했다' },
+      { from: '우편국', to: '부산항', label: '위치했다' },
+      { from: '우편국', to: '1911년', label: '설치되었다' },
+      { from: '부산일본영사관', to: '부산부청', label: '개편되었다' },
+      { from: '부산부제', to: '부산부청', label: '설치하다' },
+      { from: '부군면통폐합', to: '부산부제', label: '설치하다' },
+      { from: '부산부청', to: '동헌', label: '대체했다' },
+      { from: '동헌', to: '조선', label: '소속했다' },
+      { from: '동헌', to: '초량왜관', label: '관리했다' },
+      { from: '동헌', to: '동래', label: '위치했다' },
+      { from: '일본', to: '동헌', label: '해체했다' },
+      { from: '동헌', to: '1910년', label: '해체되었다' },
+      { from: '일본', to: '온천', label: '개발했다' },
+      { from: '온천', to: '동래', label: '위치했다' },
+      { from: '온천장역', to: '동래', label: '위치했다' },
+      { from: '일본', to: '온천장역', label: '설치했다' },
+      { from: '부산전차', to: '온천장역', label: '통과했다' },
+      { from: '일본인', to: '온천', label: '관광했다' },
+      { from: '동래', to: '도시중심', label: '역할했다' },
+      { from: '부산항', to: '도시중심', label: '역할했다' },
+      { from: '부산항', to: '동래', label: '대체했다' },
+      { from: '도시중심', to: '부군면통폐합', label: '개편되었다' },
+      { from: '일본', to: '부군면통폐합', label: '설치했다' }
+    ]);
+
+    const container = document.getElementById('mynetwork');
+    const data = { nodes: nodes, edges: edges };
+    const options = {
+      autoResize: true,
+      interaction: {
+        hover: true,
+        tooltipDelay: 120
+      },
+      nodes: {
+        shape: 'ellipse',
+        color: {
+          background: '#f7fdff',
+          border: '#52abc5',
+          highlight: { border: '#ff9773', background: '#ffffff' },
+          hover: { border: '#ff9773', background: '#ffffff' }
+        },
+        font: {
+          color: '#17495b',
+          size: 14,
+          face: 'Noto Sans KR'
+        },
+        borderWidth: 1.5,
+        shadow: {
+          enabled: true,
+          color: 'rgba(82, 171, 197, 0.16)',
+          size: 12,
+          x: 0,
+          y: 4
+        },
+        margin: 11
+      },
+      edges: {
+        color: {
+          color: 'rgba(82, 171, 197, 0.54)',
+          highlight: '#ff9773'
+        },
+        font: {
+          color: '#5a7e8e',
+          size: 11,
+          align: 'middle',
+          strokeWidth: 4,
+          strokeColor: 'rgba(255,255,255,0.82)'
+        },
+        arrows: {
+          to: {
+            enabled: true,
+            scaleFactor: 0.65
+          }
+        },
+        smooth: {
+          enabled: true,
+          type: 'dynamic',
+          roundness: 0.45
+        },
+        width: 1.4
+      },
+      physics: {
+        enabled: true,
+        barnesHut: {
+          gravitationalConstant: -2300,
+          centralGravity: 0.22,
+          springLength: 155,
+          springConstant: 0.032,
+          damping: 0.11
+        },
+        stabilization: { iterations: 170 }
+      }
+    };
+
+    new vis.Network(container, data, options);
+  };
+
+  window.addEventListener('load', initGraph);
+</script>
+
+</body>
+</html>
